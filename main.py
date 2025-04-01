@@ -27,16 +27,17 @@ pygame.mixer.music.load('assets/Menu.mp3')  # Música para o menu
 pygame.mixer.music.play(-1)  # Toca a música do menu em loop
 
 
-# Classe do jogador (substituir o retângulo por imagem do jogador futuramente)
+# Classe do jogador
 class Jogador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((50, 50))
-        self.image.fill(VERDE)  # Cor do personagem (substituir por imagem futuramente)
+        self.image = pygame.image.load("assets/Jogador.png").convert_alpha()  # Carregar imagem do jogador
+        self.image = pygame.transform.scale(self.image, (150, 150))  # Ajustar tamanho se necessário
         self.rect = self.image.get_rect()
         self.rect.center = (100, WIN_HEIGHT // 2)
         self.velocidade_y = 0
         self.vidas = 3  # Jogador começa com 3 vidas
+
 
     def update(self):
         self.velocidade_y = 0
@@ -66,12 +67,12 @@ class Jogador(pygame.sprite.Sprite):
         return False
 
 
-# Classe dos projéteis (substituir o retângulo por imagem do projétil futuramente)
+# Classe dos projéteis
 class Projetil(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((10, 5))
-        self.image.fill(VERMELHO)  # Cor do projétil (substituir por imagem futuramente)
+        self.image = pygame.image.load("assets/Projeteis.png").convert_alpha()  # Carregar imagem do projétil
+        self.image = pygame.transform.scale(self.image, (40, 20))  # Ajustar tamanho se necessário
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.velocidade_x = 10
@@ -82,16 +83,28 @@ class Projetil(pygame.sprite.Sprite):
             self.kill()
 
 
-# Classe dos asteroides (substituir o círculo por imagem do asteroide futuramente)
+    def update(self):
+        self.rect.x += self.velocidade_x
+        if self.rect.left > WIN_WIDTH:
+            self.kill()
+
+
+# Classe dos asteroides
 class Asteroide(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((40, 40), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, AZUL, (20, 20), 20)  # Forma circular (substituir por imagem futuramente)
+        self.image = pygame.image.load("assets/Asteroides.png").convert_alpha()  # Carregar imagem do asteroide
+        self.image = pygame.transform.scale(self.image, (100, 100))  # Ajustar tamanho se necessário
         self.rect = self.image.get_rect()
         self.rect.x = WIN_WIDTH
         self.rect.y = random.randint(0, WIN_HEIGHT - self.rect.height)
         self.velocidade_x = random.randint(3, 8)
+
+    def update(self):
+        self.rect.x -= self.velocidade_x
+        if self.rect.right < 0:
+            self.kill()
+
 
     def update(self):
         self.rect.x -= self.velocidade_x
