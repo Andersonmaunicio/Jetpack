@@ -9,7 +9,7 @@ pygame.init()
 WIN_WIDTH = 800
 WIN_HEIGHT = 600
 tela = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption('Jogo Jetpack')
+pygame.display.set_caption('Jet Pack')  # Nome do jogo no título da janela
 
 # Cores
 BRANCO = (255, 255, 255)
@@ -17,7 +17,7 @@ PRETO = (0, 0, 0)
 VERMELHO = (255, 0, 0)
 AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
-AMARELO = (255, 255, 0)
+AMARELO = (255, 255, 0)  # Amarelo brilhante
 
 # Frames por segundo
 clock = pygame.time.Clock()
@@ -26,18 +26,20 @@ clock = pygame.time.Clock()
 pygame.mixer.music.load('assets/Menu.mp3')  # Música para o menu
 pygame.mixer.music.play(-1)  # Toca a música do menu em loop
 
+# Carregar imagens de fundo
+bg_image = pygame.image.load('assets/Background.png')
+menu_bg = pygame.image.load('assets/Menubg.png')  # Imagem de fundo do menu
 
 # Classe do jogador
 class Jogador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("assets/Jogador.png").convert_alpha()  # Carregar imagem do jogador
-        self.image = pygame.transform.scale(self.image, (150, 150))  # Ajustar tamanho se necessário
+        self.image = pygame.image.load('assets/Jogador.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
-        self.rect.center = (100, WIN_HEIGHT // 2)
+        self.rect.center = (100, WIN_HEIGHT // 2)  # Posição inicial à esquerda
         self.velocidade_y = 0
-        self.vidas = 3  # Jogador começa com 3 vidas
-
+        self.vidas = 3  # Sempre inicia com 3 vidas
 
     def update(self):
         self.velocidade_y = 0
@@ -55,24 +57,23 @@ class Jogador(pygame.sprite.Sprite):
         if self.rect.bottom > WIN_HEIGHT:
             self.rect.bottom = WIN_HEIGHT
 
-    def atirar(self):
-        projetil = Projetil(self.rect.right, self.rect.centery)
-        todos_sprites.add(projetil)
-        projeteis.add(projetil)
-
     def perder_vida(self):
         self.vidas -= 1
         if self.vidas <= 0:
             return True
         return False
 
+    def atirar(self):
+        projetil = Projetil(self.rect.right, self.rect.centery)
+        todos_sprites.add(projetil)
+        projeteis.add(projetil)
 
 # Classe dos projéteis
 class Projetil(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load("assets/Projeteis.png").convert_alpha()  # Carregar imagem do projétil
-        self.image = pygame.transform.scale(self.image, (40, 20))  # Ajustar tamanho se necessário
+        self.image = pygame.image.load('assets/Projeteis.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (10, 5))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.velocidade_x = 10
@@ -82,19 +83,12 @@ class Projetil(pygame.sprite.Sprite):
         if self.rect.left > WIN_WIDTH:
             self.kill()
 
-
-    def update(self):
-        self.rect.x += self.velocidade_x
-        if self.rect.left > WIN_WIDTH:
-            self.kill()
-
-
 # Classe dos asteroides
 class Asteroide(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("assets/Asteroides.png").convert_alpha()  # Carregar imagem do asteroide
-        self.image = pygame.transform.scale(self.image, (100, 100))  # Ajustar tamanho se necessário
+        self.image = pygame.image.load('assets/Asteroides.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.x = WIN_WIDTH
         self.rect.y = random.randint(0, WIN_HEIGHT - self.rect.height)
@@ -105,13 +99,6 @@ class Asteroide(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-
-    def update(self):
-        self.rect.x -= self.velocidade_x
-        if self.rect.right < 0:
-            self.kill()
-
-
 # Grupos de sprites
 todos_sprites = pygame.sprite.Group()
 projeteis = pygame.sprite.Group()
@@ -119,13 +106,7 @@ asteroides = pygame.sprite.Group()
 
 # Variáveis de jogo
 pontuacao = 0
-vidas_restantes = 3
-tempo_limite = 60  # 60 segundos para passar de fase
-
-# Criar o jogador
-jogador = Jogador()
-todos_sprites.add(jogador)
-
+tempo_limite = 60
 
 # Função para gerar asteroides
 def gerar_asteroides():
@@ -133,12 +114,10 @@ def gerar_asteroides():
     todos_sprites.add(asteroide)
     asteroides.add(asteroide)
 
-
 # Função para tocar a música da fase
 def tocar_musica_fase():
-    pygame.mixer.music.load('assets/Level1.MP3')  # Música para a fase 1
-    pygame.mixer.music.play(-1)  # Toca a música em loop
-
+    pygame.mixer.music.load('assets/Level.mp3')
+    pygame.mixer.music.play(-1)
 
 # Função para exibição da mensagem de derrota
 def mostrar_tela_derrota():
@@ -146,28 +125,31 @@ def mostrar_tela_derrota():
     fonte = pygame.font.Font(None, 74)
     texto_derrota = fonte.render("GAME OVER", True, BRANCO)
     tela.blit(texto_derrota, (250, 200))
-
     pygame.display.flip()
-    pygame.time.wait(2000)  # Aguardar 2 segundos antes de retornar ao menu
-    mostrar_menu()  # Retorna ao menu principal
+    pygame.time.wait(2000)
+    mostrar_menu()
 
+# Função para exibir a pontuação
+def mostrar_pontuacao():
+    fonte = pygame.font.Font(None, 36)
+    texto_pontuacao = fonte.render(f'Pontuação: {pontuacao}', True, BRANCO)
+    tela.blit(texto_pontuacao, (10, 10))
 
-# Função para exibir a mensagem de "Passou de Fase"
-def passar_de_fase():
-    tela.fill(PRETO)
-    fonte = pygame.font.Font(None, 74)
-    texto_passar = fonte.render("Fase Concluída!", True, BRANCO)
-    tela.blit(texto_passar, (250, 200))
+# Função para exibir a quantidade de vidas restantes
+def mostrar_vidas(jogador):
+    fonte = pygame.font.Font(None, 36)
+    texto_vidas = fonte.render(f'Vidas: {jogador.vidas}', True, BRANCO)
+    tela.blit(texto_vidas, (WIN_WIDTH - 120, 10))
 
-    pygame.display.flip()
-    pygame.time.wait(2000)  # Aguardar 2 segundos antes de continuar para a próxima fase
-    mostrar_menu()  # Retorna ao menu principal
+# Função para exibir o tempo restante
+def mostrar_tempo(tempo_restante):
+    fonte = pygame.font.Font(None, 36)
+    texto_tempo = fonte.render(f'Tempo: {tempo_restante}s', True, BRANCO)
+    tela.blit(texto_tempo, (WIN_WIDTH // 2 - 50, 10))
 
-
-# Loop principal do jogo
+# Função principal do jogo
 def main():
-    global pontuacao, vidas_restantes, tempo_limite
-    # Resetar variáveis e reiniciar grupos de sprites
+    global pontuacao, tempo_limite
     todos_sprites.empty()
     projeteis.empty()
     asteroides.empty()
@@ -175,12 +157,14 @@ def main():
     jogador = Jogador()
     todos_sprites.add(jogador)
 
-    # Iniciar o tempo
     tempo_inicial = pygame.time.get_ticks()
 
     rodando = True
+    invencivel = False
+    tempo_invencivel = 0
+
     while rodando:
-        clock.tick(60)  # FPS
+        clock.tick(60)
 
         # Processamento de eventos
         for evento in pygame.event.get():
@@ -190,79 +174,75 @@ def main():
                 if evento.key == pygame.K_SPACE:
                     jogador.atirar()
 
-        # Calcular o tempo restante
         tempo_passado = (pygame.time.get_ticks() - tempo_inicial) // 1000
         tempo_restante = tempo_limite - tempo_passado
 
         if tempo_restante <= 0:
-            passar_de_fase()
+            mostrar_tela_derrota()
             rodando = False
 
-        # Atualizar sprites
+        # Atualizar invencibilidade
+        if invencivel:
+            tempo_invencivel -= 1
+            if tempo_invencivel <= 0:
+                invencivel = False
+
         todos_sprites.update()
 
-        # Verificar colisões entre projéteis e asteroides
         colisao_projeteis = pygame.sprite.groupcollide(projeteis, asteroides, True, True)
         for _ in colisao_projeteis:
-            pontuacao += 1  # Aumenta a pontuação a cada asteroide destruído
+            pontuacao += 1
 
-        # Verificar colisões entre jogador e asteroides
-        colisao_jogador = pygame.sprite.spritecollide(jogador, asteroides, False)
-        if colisao_jogador:
-            if jogador.perder_vida():
-                mostrar_tela_derrota()  # Mostrar a tela de derrota
-                rodando = False  # Encerra o jogo
-            else:
-                # Respawn do jogador após perda de vida
-                jogador.rect.center = (100, WIN_HEIGHT // 2)
-                pygame.time.wait(500)  # Aguardar meio segundo antes de continuar
+        if not invencivel:
+            colisao_jogador = pygame.sprite.spritecollide(jogador, asteroides, True)
+            if colisao_jogador:
+                if jogador.perder_vida():
+                    mostrar_tela_derrota()
+                    rodando = False
+                else:
+                    jogador.rect.center = (100, WIN_HEIGHT // 2)
+                    invencivel = True
+                    tempo_invencivel = 60
 
-        # Gerar asteroides periodicamente
         if random.random() > 0.98:
             gerar_asteroides()
 
-        # Desenhar tudo na tela
         tela.fill(PRETO)
+        tela.blit(bg_image, (0, 0))
         todos_sprites.draw(tela)
-
-        # Exibir pontuação, vidas e tempo
-        fonte = pygame.font.Font(None, 36)
-        texto_pontuacao = fonte.render(f'Pontuação: {pontuacao}', True, BRANCO)
-        tela.blit(texto_pontuacao, (10, 10))
-
-        texto_vidas = fonte.render(f'Vidas: {jogador.vidas}', True, BRANCO)
-        tela.blit(texto_vidas, (WIN_WIDTH - 120, 10))
-
-        texto_tempo = fonte.render(f'Tempo: {tempo_restante}s', True, BRANCO)
-        tela.blit(texto_tempo, (WIN_WIDTH // 2 - 50, 10))
+        mostrar_pontuacao()
+        mostrar_vidas(jogador)
+        mostrar_tempo(tempo_restante)
 
         pygame.display.flip()
 
     pygame.quit()
     sys.exit()
 
-
 # Função para o menu principal
 def mostrar_menu():
-    pygame.mixer.music.stop()  # Parar a música da fase antes de voltar para o menu
-    pygame.mixer.music.load('assets/Menu.mp3')  # Carregar música do menu
-    pygame.mixer.music.play(-1)  # Tocar música do menu em loop
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load('assets/Menu.mp3')
+    pygame.mixer.music.play(-1)
 
     rodando_menu = True
-    opcao_selecionada = 0  # 0 para "New Game", 1 para "Quit"
+    opcao_selecionada = 0
     while rodando_menu:
-        tela.fill(BRANCO)
+        tela.blit(menu_bg, (0, 0))  # Usa Menubg.png como fundo
         fonte = pygame.font.Font(None, 48)
+        fonte_titulo = pygame.font.Font(None, 100)  # Fonte maior para o título
 
-        # Opções do menu
+        # Título "Jet Pack" maior e com cor brilhante
+        texto_titulo = fonte_titulo.render("Jet Pack", True, AMARELO)  # Amarelo brilhante
         texto_new_game = fonte.render("New Game", True, AMARELO if opcao_selecionada == 0 else PRETO)
         texto_quit = fonte.render("Quit", True, AMARELO if opcao_selecionada == 1 else PRETO)
 
+        # Centralizar o título e posicionar as opções
+        tela.blit(texto_titulo, (WIN_WIDTH // 2 - texto_titulo.get_width() // 2, 120))  # Ajustado para caber melhor
         tela.blit(texto_new_game, (350, 250))
         tela.blit(texto_quit, (350, 300))
         pygame.display.flip()
 
-        # Processamento de eventos
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando_menu = False
@@ -271,21 +251,20 @@ def mostrar_menu():
 
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_DOWN:
-                    opcao_selecionada = (opcao_selecionada + 1) % 2  # Alternar entre "New Game" e "Quit"
+                    opcao_selecionada = (opcao_selecionada + 1) % 2
                 if evento.key == pygame.K_UP:
-                    opcao_selecionada = (opcao_selecionada - 1) % 2  # Alternar entre "Quit" e "New Game"
+                    opcao_selecionada = (opcao_selecionada - 1) % 2
 
                 if evento.key == pygame.K_RETURN:
                     if opcao_selecionada == 0:
                         rodando_menu = False
-                        pygame.mixer.music.stop()  # Parar a música do menu
-                        tocar_musica_fase()  # Tocar música da fase 1
-                        main()  # Iniciar o jogo
+                        pygame.mixer.music.stop()
+                        tocar_musica_fase()
+                        main()
                     elif opcao_selecionada == 1:
                         rodando_menu = False
                         pygame.quit()
                         sys.exit()
-
 
 if __name__ == "__main__":
     mostrar_menu()
